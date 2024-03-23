@@ -29,7 +29,7 @@ class ScannedIndicator: Entity, HasModel, HasCollision {
         self.hits += 1
         
         var mat = UnlitMaterial(color: UIColor(red: 0, green: self.hits / 5, blue: 1 / self.hits, alpha: 1))
-        mat.blending = .transparent(opacity: PhysicallyBasedMaterial.Opacity(floatLiteral: Float(0.1 * self.hits)))
+        // mat.blending = .transparent(opacity: PhysicallyBasedMaterial.Opacity(floatLiteral: Float(0.1 * self.hits)))
         
         self.components[ModelComponent] = ModelComponent(
             mesh: .generatePlane(width: 0.25, depth: 0.25, cornerRadius: 3.14),
@@ -39,7 +39,7 @@ class ScannedIndicator: Entity, HasModel, HasCollision {
     
     required init() {
         var mat = UnlitMaterial(color: UIColor(red: 0, green: 0, blue: 1, alpha: 1))
-        mat.blending = .transparent(opacity: 0.1)
+			// mat.blending = .transparent(opacity: 0.1)
         self.mat = mat
         super.init()
         self.components[ModelComponent] = ModelComponent(
@@ -62,8 +62,6 @@ struct RealityKitView: UIViewRepresentable {
         let config = ARWorldTrackingConfiguration()
         config.planeDetection = [.horizontal]
         
-        // config.initialWorldMap =
-        
         session.run(config)
         
         let coachingOverlay = ARCoachingOverlayView()
@@ -72,12 +70,6 @@ struct RealityKitView: UIViewRepresentable {
         coachingOverlay.goal = .horizontalPlane
         arView.addSubview(coachingOverlay)
     
-        
-        
-        
-        #if DEBUG
-        arView.debugOptions = [.showStatistics]
-        #endif
         
         return arView
     }
@@ -96,7 +88,14 @@ struct RealityKitView: UIViewRepresentable {
 }
 
 struct ContentView: View {
-    var locationManager = LocationDataManager()
+	@State private var currentSession: Session
+	
+	let goBack: () -> Void
+	
+	init(currentSession: Session, goBack: @escaping () -> Void) {
+		self._currentSession = State(initialValue: currentSession)
+		self.goBack = goBack
+	}
     
     @State private var arView = ARView(frame: .zero)
     
@@ -105,22 +104,29 @@ struct ContentView: View {
     
     @State private var scannedIndicators: [ScannedIndicator] = []
     
-    var worldMapURL: URL = {
+	func getWorldMapURL() -> URL {
+				let lat = currentSession.lat
+				let long = currentSession.long
+			
         do {
             return try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                .appendingPathComponent("worldMapURL")
+						.appendingPathComponent("worldMap;lat:\(lat);long:\(long)")
         } catch {
             fatalError("Error getting world map URL from document directory.")
         }
-    }()
+    }
+	
     
     func archive(worldMap: ARWorldMap) throws {
         let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
-        try data.write(to: self.worldMapURL, options: [.atomic])
+        try data.write(to: self.getWorldMapURL(), options: [.atomic])
     }
     
     var body: some View {
         VStack {
+						Button(action: goBack) {
+								Text("< Back")
+						}
             RealityKitView(arView: $arView)
                 .ignoresSafeArea()
             Button(action: toggleCasting) {
@@ -149,13 +155,6 @@ struct ContentView: View {
                 return
             }
             
-//            // Add a snapshot image indicating where the map was captured.
-//                guard let snapshotAnchor = SnapshotAnchor(capturing: self.sceneView)
-//                    else { fatalError("Can't take snapshot") }
-//                map.anchors.append(snapshotAnchor)
-//            
-//
-            
             do {
                 print("anchorCount: ", worldMap.anchors.count)
                 try self.archive(worldMap: worldMap)
@@ -168,7 +167,7 @@ struct ContentView: View {
     
     func retrieveWorldMapData() -> Data? {
         do {
-            return try Data(contentsOf: self.worldMapURL)
+            return try Data(contentsOf: self.getWorldMapURL())
         } catch {
             print("Error retrieving world map data.")
             return nil
@@ -195,7 +194,6 @@ struct ContentView: View {
             print("Failed to get world data, not loading")
             return
         }
-        print("got data")
         let worldMap = unarchive(worldMapData: data)
         
         let config = ARWorldTrackingConfiguration()
@@ -204,17 +202,12 @@ struct ContentView: View {
         config.initialWorldMap = worldMap
         
         arView.session.run(config, options: [.removeExistingAnchors, .resetTracking])
-        print("Loaded")
-        print("anchorCount: ", worldMap?.anchors.count)
-        
-        // guard let anchors = worldMap?.anchors else {return}
+			
         guard let anchors = arView.session.currentFrame?.anchors else {return}
         
         
         for anchor in anchors {
             if anchor.name == "Scanned" {
-                print("found a scanned archor")
-                
                 let anchorEntity = AnchorEntity(anchor: anchor)
                 
                 let scannedSpot = ScannedIndicator()
@@ -229,19 +222,6 @@ struct ContentView: View {
                 
                 scannedIndicators.append(scannedSpot)
                 
-                
-//                let scannedSpot = ScannedIndicator()
-//                scannedSpot.name = "Scanned"
-//                
-//                let anchorEntity = AnchorEntity(anchor: anchor)
-//                
-//                scannedSpot.setAnchor(anchor: anchorEntity)
-//                
-//                arView.scene.addAnchor(anchorEntity)
-//                
-//                scannedIndicators.append(scannedSpot)
-            } else {
-                print("other anchor: ", anchor)
             }
         }
         
@@ -254,7 +234,6 @@ struct ContentView: View {
             spot.removeAnchor()
         }
         scannedIndicators = []
-        print("Cleared")
     }
     
     @State private var timer: Optional<AnyCancellable> = nil
@@ -326,43 +305,5 @@ struct ContentView: View {
         arView.scene.addAnchor(anchorEntity)
         
         scannedIndicators.append(scannedSpot)
-    }
-    
-    
-    func saveAll() {
-        //        var modelEntityDetailsDict: [String: [String]] = [:]
-        //
-        //        if let arAnchors = arView.session.currentFrame?.anchors {
-        //            for arAnchor in arAnchors {
-        //                if let modelName = arAnchor.name {
-        //                    let identifier = arAnchor.identifier
-        //
-        //                    if let anchorEntity = arView.scene.findEntity(named: identifier.uuidString) as? AnchorEntity,
-        //                        let modelEntity = anchorEntity.children.first as? ModelEntity {
-        //                        let transformDetails = [
-        //                            modelEntity.transform.translation.debugDescription,
-        //                            modelEntity.transform.rotation.debugDescription,
-        //                            modelEntity.transform.scale.debugDescription
-        //                        ]
-        //                        modelEntityDetailsDict["\(modelName)@\(identifier.uuidString)"] = transformDetails
-        //                    }
-        //
-        //                }
-        //            }
-        //        }
-        
-        //let anchorDataURL = self.wo
-    
-        arView.session.getCurrentWorldMap { worldMap, error in
-            guard let map = worldMap
-                else { print("Can't get current world map", error!.localizedDescription); return }
-            
-            // Add a snapshot image indicating where the map was captured.
-//            guard let snapshotAnchor = SnapshotAnchor(capturing: self.sceneView)
-//                else { fatalError("Can't take snapshot") }
-//            map.anchors.append(snapshotAnchor)
-            
-        }
-        
     }
 }

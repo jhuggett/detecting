@@ -10,6 +10,8 @@ import CoreLocation
 
 class LocationDataManager: NSObject, CLLocationManagerDelegate {
     var locationManager = CLLocationManager()
+	
+	var currentLocation: CLLocation? = nil
     
     override init() {
         super.init()
@@ -25,6 +27,8 @@ class LocationDataManager: NSObject, CLLocationManagerDelegate {
             print("ALT: ", location.altitude)
             print("V-Ac: ", location.verticalAccuracy)
             print("H-Ac: ", location.horizontalAccuracy)
+					
+					currentLocation = location
         }
     }
     
@@ -36,7 +40,7 @@ class LocationDataManager: NSObject, CLLocationManagerDelegate {
             print("Good to go")
             manager.desiredAccuracy = kCLLocationAccuracyBest
             manager.distanceFilter = 0.1
-            // manager.startUpdatingLocation()
+            manager.startUpdatingLocation()
         default:
             print("auth status: ", manager.authorizationStatus.rawValue)
         }

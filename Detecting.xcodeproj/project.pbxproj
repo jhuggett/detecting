@@ -13,6 +13,7 @@
 		8E16451A2B655D3A003FD8F7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E1645192B655D3A003FD8F7 /* Preview Assets.xcassets */; };
 		8E8D7DF42B6565D900648257 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8D7DF32B6565D900648257 /* Location.swift */; };
 		8E93CC6F2BA75D2F00E1674A /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CC6E2BA75D2F00E1674A /* MapView.swift */; };
+		8E93CC712BAA38BF00E1674A /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CC702BAA38BF00E1674A /* Session.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		8E8D7DF32B6565D900648257 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		8E8D7DF52B65692000648257 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8E93CC6E2BA75D2F00E1674A /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		8E93CC702BAA38BF00E1674A /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				8E1645182B655D3A003FD8F7 /* Preview Content */,
 				8E8D7DF32B6565D900648257 /* Location.swift */,
 				8E93CC6E2BA75D2F00E1674A /* MapView.swift */,
+				8E93CC702BAA38BF00E1674A /* Session.swift */,
 			);
 			path = Detecting;
 			sourceTree = "<group>";
@@ -148,6 +151,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E93CC712BAA38BF00E1674A /* Session.swift in Sources */,
 				8E1645152B655D39003FD8F7 /* ContentView.swift in Sources */,
 				8E93CC6F2BA75D2F00E1674A /* MapView.swift in Sources */,
 				8E8D7DF42B6565D900648257 /* Location.swift in Sources */,
@@ -285,7 +289,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Detecting/Preview Content\"";
-				DEVELOPMENT_TEAM = 56H4SFH58P;
+				DEVELOPMENT_TEAM = VQGGJMJDBA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Detecting/Info.plist;
